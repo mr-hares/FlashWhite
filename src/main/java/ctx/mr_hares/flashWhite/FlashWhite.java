@@ -218,6 +218,8 @@ public final class FlashWhite extends JavaPlugin {
             return "";
         }
 
+        message = message.replace("{prefix}", getLocale().getString("prefix", "&#6666ff(FlashWhite) &r"));
+
         Matcher matcher = Pattern.compile("&#([A-Fa-f0-9]{6})").matcher(message);
         StringBuffer buffer = new StringBuffer();
 

@@ -8,3 +8,4 @@ authors: [ mr_hares ]
 commands:
   flashwhite:
     permissions: flashwhite.use
+    aliases: [fw]

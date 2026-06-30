@@ -157,19 +157,19 @@ public class ButtonInteraction extends ListenerAdapter {
                     event.getUser().getAsMention(),
                     verdict,
                     Instant.now().getEpochSecond())), Separator.create(true, Separator.Spacing.SMALL), TextDisplay.of("*Спасибо за обращение!*")));
-            
-            CompletableFuture.runAsync(() -> {
-                if (isAccept && ticket.length > 1 && ticket[1] != null && !ticket[1].equals("not_specified")) {
-                    getDataBase().addPlayer("not", ticket[1], "[DS] " + event.getUser().getName());
-                    sendConsole("(FlashWhite) Игрок " + ticket[1] + " добавлен в белый список модератором " + event.getUser().getName() + " с Discord");
-                }
 
+            if (isAccept && ticket.length > 1 && ticket[1] != null && !ticket[1].equals("not_specified")) {
+                getDataBase().addPlayer("not", ticket[1], "[DS] " + event.getUser().getName());
+                sendConsole("(FlashWhite) Игрок " + ticket[1] + " добавлен в белый список модератором " + event.getUser().getName() + " с Discord");
+            }
+
+            CompletableFuture.runAsync(() -> {
                 getJda().retrieveUserById(ticket[0]).queue(user -> {
                     Role grant_role = event.getGuild().getRoleById(getInstance().getConfig().getString("discord" +
                             ".grant_role", "123456789012345678"));
                     if (grant_role != null && isAccept) {
-                        event.getGuild().addRoleToMember(user, grant_role).reason("Ticket by flashWhite").queue(error -> {
-                            sendConsole("(flashWhite) &6Ошибка при выдаче роли. Проверьте, находится ли бот выше " +
+                        event.getGuild().addRoleToMember(user, grant_role).reason("Ticket by FlashWhite").queue(success -> {}, error -> {
+                            sendConsole("(FlashWhite) &6Ошибка при выдаче роли. Проверьте, находится ли бот выше " +
                                     "указанной роли в конфиге");
                         });
                     }
