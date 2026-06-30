@@ -1,0 +1,44 @@
+time:
+  d: "&e{time} &7д."
+  h: "&e{time} &7ч."
+  m: "&e{time} &7м."
+  s: "&e{time} &7сек."
+  forever: "&dнавсегда"
+
+prefix: "&#6666ff(FlashWhite) &r"
+
+not-in-whitelist:
+  - "&c&l[!] &fВы не находитесь в белом списке сервера."
+  - "&7Пожалуйста, обратитесь к администрации для добавления."
+
+not-permission: "{prefix}&cУ вас недостаточно прав для выполнения этой команды."
+
+reload-start: "{prefix}&fПроцесс перезагрузки конфигурации запущен..."
+reload-end: "{prefix}&aКонфигурация успешно перезагружена! &7({time} сек)"
+
+help:
+  command-list:
+    - ""
+    - "  &d&lFlashWhite &8| &fСписок доступных команд:"
+    - "  &a/flashwhite reload &8— &7Перезагрузить плагин"
+    - "  &a/flashwhite add &e[ник] [время] &8— &7Добавить игрока в список"
+    - "  &a/flashwhite remove &e[ник] &8— &7Удалить игрока из списка"
+    - "  &a/flashwhite list &e[страница] &8— &7Показать белый список"
+    - ""
+  use-add: "{prefix}&7Используйте: &a/flashwhite add &e[ник] [время]"
+  use-remove: "{prefix}&7Используйте: &a/flashwhite remove &e[ник]"
+  use-list: "{prefix}&7Используйте: &a/flashwhite list &e[страница]"
+
+player-not-in-whitelist: "{prefix}&fИгрок &e{player} &fне найден в белом списке."
+player-in-whitelist: "{prefix}&fИгрок &e{player} &aуже &fнаходится в белом списке."
+
+player-add: "{prefix}&fИгрок &e{player} &fуспешно добавлен в белый список &8(Срок: {time}&8)"
+player-remove: "{prefix}&fИгрок &e{player} &fудален из белого списка."
+
+list:
+  header: "&d&lFlashWhite &8| &fБелый список &8(Страница {page}&8)"
+  item:
+    - "  &e• &f{player} &7(Добавил: &a{moder}&7)"
+    - "    &8UUID: {uuid}"
+
+not-found-page: "{prefix}&fУказанная страница &#6666ffне найдена."

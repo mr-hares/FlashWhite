@@ -1,0 +1,78 @@
+discord:
+  # Токен вашего Discord-бота
+  bot-token: "YOUR_BOT_TOKEN"
+
+  # Категория, в которой создаются новые тикеты
+  category_id: 123456789012345678
+
+  # Роли персонала (могут принимать/отклонять)
+  role_staff:
+    - 123456789012345678  # Модератор
+    - 123456789012345678  # Админ
+
+  # Роль, которая будет выдаваться при принятии заявки
+  grant_role: 123456789012345678
+
+  # Название модального окна (формы с вопросами)
+  modal-title: "Форма заявления"
+
+  # -------- НАСТРОЙКИ ТИКЕТА --------
+  ticket:
+    # Формат названия: доступны {user_name}, {user_id}
+    name_format: "ticket-{user_name}"
+
+  # -------- СООБЩЕНИЕ ДЛЯ СОЗДАНИЯ ТИКЕТА --------
+  info-message:
+    content: "# Подача заявки на Whitelist"
+    embed:
+      title: ""
+      author:
+        name: ""
+        url: ""
+        icon_url: ""
+      description: ""
+      fields:
+        1:
+          name: ""
+          value: ""
+          inline: false
+      image_url: ""
+      thumbnail_url: ""
+      timestamp: true
+      color: ""
+    button:
+      text: "Подать заявку в белый список"
+
+  # -------- ВОПРОСЫ АНКЕТЫ --------
+  questions:
+    nick: # ключ вопроса (используется в {answer_nick})
+      title: "Ваш игровой никнейм"
+      placeholder: "Введите ник"
+      type: SHORT
+      min_length: 3
+      max_length: 16
+
+  # -------- СООБЩЕНИЕ ВНУТРИ ТИКЕТА --------
+  ticket-message:
+    content: "**Новая заявка от {mention}**"
+    embed:
+      title: ""
+      author:
+        name: ""
+        url: ""
+        icon_url: ""
+      description: ""
+      fields:
+        1:
+          name: "Никнейм"
+          value: "{answer_nick}"
+          inline: false
+      image_url: ""
+      thumbnail_url: ""
+      timestamp: true
+      color: ""
+    button:
+      accept:
+        text: "Принять"
+      decline:
+        text: "Отклонить"
