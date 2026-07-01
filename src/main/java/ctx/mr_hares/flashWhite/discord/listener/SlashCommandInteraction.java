@@ -1,6 +1,7 @@
 package ctx.mr_hares.flashWhite.discord.listener;
 
 import ctx.mr_hares.flashWhite.utils.EmbedBuild;
+import ctx.mr_hares.flashWhite.utils.EmojiParser;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
@@ -55,7 +56,7 @@ public class SlashCommandInteraction extends ListenerAdapter {
         event.deferReply(true).queue();
 
         if (!hasPermission(event.getMember())) {
-            event.getHook().sendMessage(getEmbed("❌ У вас нет прав для использования этой команды").build())
+            event.getHook().sendMessageEmbeds(getEmbed("❌ У вас нет прав для использования этой команды").build())
                     .setEphemeral(true)
                     .queue();
             return;
@@ -63,7 +64,7 @@ public class SlashCommandInteraction extends ListenerAdapter {
 
         long categoryId = getInstance().getConfig().getLong(CONFIG_CATEGORY_ID, 0);
         if (categoryId == 0 || event.getGuild().getCategoryById(categoryId) == null) {
-            event.getHook().sendMessage(getEmbed("❌ Установите ID категории в config.yml (category_id), в которой " +
+            event.getHook().sendMessageEmbeds(getEmbed("❌ Установите ID категории в config.yml (category_id), в которой " +
                             "будут создаваться тикеты").build())
                     .setEphemeral(true)
                     .queue();
@@ -75,7 +76,7 @@ public class SlashCommandInteraction extends ListenerAdapter {
         EmbedBuilder embed = new EmbedBuild(CONFIG_INFO_MESSAGE, null, null, null).getEmbedBuilder();
 
         if ((content == null || content.isEmpty()) && embed.isEmpty()) {
-            event.getHook().sendMessage(getEmbed("❌ Ошибка. В сообщение отсутствует содержание\nЗагляните в config" +
+            event.getHook().sendMessageEmbeds(getEmbed("❌ Ошибка. В сообщение отсутствует содержание\nЗагляните в config" +
                             ".yml и добавьте содержание info-message для embed или content").build())
                     .setEphemeral(true)
                     .queue();
@@ -86,16 +87,27 @@ public class SlashCommandInteraction extends ListenerAdapter {
         if (!embed.isEmpty()) messageCreateBuilder.addEmbeds(embed.build());
 
         CompletableFuture.runAsync(() -> {
-            String buttonText = getInstance().getConfig().getString(CONFIG_INFO_MESSAGE + ".button.text", "Подать заявку в белый список");
-            messageCreateBuilder.addComponents(ActionRow.of(Button.secondary("open_ticket", buttonText)));
+            String text = getInstance().getConfig().getString(CONFIG_INFO_MESSAGE + ".button.text", "Подать заявку в " +
+                    "белый список");
+            String type = getInstance().getConfig().getString(CONFIG_INFO_MESSAGE + ".button.type", "PRIMARY");
+            String symbol = getInstance().getConfig().getString(CONFIG_INFO_MESSAGE + ".button.symbol", null);
+
+            Button button = switch (type) {
+                case "SECONDARY" -> Button.secondary("open_ticket", text).withEmoji(EmojiParser.parseEmoji(symbol));
+                case "SUCCESS" -> Button.success("open_ticket", text).withEmoji(EmojiParser.parseEmoji(symbol));
+                case "DANGER" -> Button.danger("open_ticket", text).withEmoji(EmojiParser.parseEmoji(symbol));
+                default -> Button.primary("open_ticket", text).withEmoji(EmojiParser.parseEmoji(symbol));
+            };
+
+            messageCreateBuilder.addComponents(ActionRow.of(button));
 
             event.getChannel().sendMessage(messageCreateBuilder.build())
                     .queue(success -> {
-                        event.getHook().sendMessage(getEmbed("✅ Информационное сообщение успешно отправлено").build())
+                        event.getHook().sendMessageEmbeds(getEmbed("✅ Информационное сообщение успешно отправлено").build())
                                 .setEphemeral(true)
                                 .queue();
                     }, error -> {
-                        event.getHook().sendMessage(getEmbed("❌ При отправке информационного сообщения произошла " +
+                        event.getHook().sendMessageEmbeds(getEmbed("❌ При отправке информационного сообщения произошла " +
                                         "ошибка\n\n" + error.getMessage()).build())
                                 .setEphemeral(true)
                                 .queue();

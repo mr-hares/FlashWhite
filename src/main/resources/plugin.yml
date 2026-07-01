@@ -2,10 +2,15 @@ name: FlashWhite
 version: '1.1.0'
 main: ctx.mr_hares.flashWhite.FlashWhite
 api-version: '1.21'
-load: STARTUP
 authors: [ mr_hares ]
 
 commands:
   flashwhite:
     permissions: flashwhite.use
     aliases: [fw]
+
+permissions:
+  flashwhite.use:
+    description: The ability to use the plugin's basic commands.
+  flashwhite.reload:
+    description: The ability to reload the configuration.

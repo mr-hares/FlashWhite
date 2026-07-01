@@ -1,10 +1,8 @@
 package ctx.mr_hares.flashWhite.discord.listener;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.components.container.Container;
 import net.dv8tion.jda.api.components.label.Label;
-import net.dv8tion.jda.api.components.separator.Separator;
-import net.dv8tion.jda.api.components.textdisplay.TextDisplay;
 import net.dv8tion.jda.api.components.textinput.TextInput;
 import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.Member;
@@ -12,7 +10,6 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.modals.Modal;
-import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.time.Instant;
@@ -101,7 +98,7 @@ public class ButtonInteraction extends ListenerAdapter {
             try {
                 String[] existingTicket = getDataBase().getTicket(event.getUser().getIdLong());
                 if (existingTicket != null) {
-                    event.reply(getEmbed("❌ У вас уже имеется активный тикет").build())
+                    event.replyEmbeds(getEmbed("❌ У вас уже имеется активный тикет").build())
                             .setEphemeral(true)
                             .queue();
                     return;
@@ -109,7 +106,7 @@ public class ButtonInteraction extends ListenerAdapter {
 
                 ConfigurationSection questions = getInstance().getConfig().getConfigurationSection(CONFIG_QUESTIONS);
                 if (questions == null || questions.getKeys(false).isEmpty()) {
-                    event.reply(getEmbed("❌ Вопросы для анкеты не настроены. Обратитесь к администратору.").build())
+                    event.replyEmbeds(getEmbed("❌ Вопросы для анкеты не настроены. Обратитесь к администратору.").build())
                             .setEphemeral(true)
                             .queue();
                     return;
@@ -121,7 +118,7 @@ public class ButtonInteraction extends ListenerAdapter {
 
                 return;
             } catch (Exception e) {
-                event.reply(getEmbed("❌ Непредвиденная ошибка. Попробуйте ещё раз").build())
+                event.replyEmbeds(getEmbed("❌ Непредвиденная ошибка. Попробуйте ещё раз").build())
                         .setEphemeral(true)
                         .queue();
                 return;
@@ -132,7 +129,7 @@ public class ButtonInteraction extends ListenerAdapter {
             event.deferReply(true).queue();
 
             if (!hasPermission(event.getMember())) {
-                event.getHook().sendMessage(getEmbed("❌ У вас нет прав для этого действия").build())
+                event.getHook().sendMessageEmbeds(getEmbed("❌ У вас нет прав для этого действия").build())
                         .setEphemeral(true)
                         .queue();
                 return;
@@ -140,7 +137,7 @@ public class ButtonInteraction extends ListenerAdapter {
 
             String[] ticket = getDataBase().getTicket(event.getChannelId());
             if (ticket == null) {
-                event.getHook().sendMessage(getEmbed("❌ Этот канал не является тикетом").build())
+                event.getHook().sendMessageEmbeds(getEmbed("❌ Этот канал не является тикетом").build())
                         .setEphemeral(true)
                         .queue();
                 return;
@@ -149,38 +146,50 @@ public class ButtonInteraction extends ListenerAdapter {
             boolean isAccept = buttonId.equals("accept_ticket");
             String verdict = isAccept ? "Принять" : "Отклонить";
 
-            MessageCreateBuilder verdictMessage = new MessageCreateBuilder();
-            verdictMessage.useComponentsV2(true);
-            verdictMessage.addComponents(Container.of(TextDisplay.of("## 📋 Вердикт по тикету"), Separator.create(true, Separator.Spacing.SMALL), TextDisplay.of(String.format("**1.** Модератор: %s\n" +
-                            "**2.** Вердикт: **%s**\n" +
-                            "**3.** Дата: <t:%d:F>\n",
-                    event.getUser().getAsMention(),
-                    verdict,
-                    Instant.now().getEpochSecond())), Separator.create(true, Separator.Spacing.SMALL), TextDisplay.of("*Спасибо за обращение!*")));
+            EmbedBuilder verdictMessage = new EmbedBuilder();
+            verdictMessage.setTitle("Решение по тикету");
+            verdictMessage.addField("Модератор", event.getUser().getAsMention(), true);
+            verdictMessage.addField("Вердикт", verdict, true);
+            verdictMessage.addField("Дата закрытия", String.format("<t:%d:F>", Instant.now().getEpochSecond()), false);
+            verdictMessage.setFooter("Спасибо за обращение");
 
             if (isAccept && ticket.length > 1 && ticket[1] != null && !ticket[1].equals("not_specified")) {
                 getDataBase().addPlayer("not", ticket[1], "[DS] " + event.getUser().getName());
                 sendConsole("(FlashWhite) Игрок " + ticket[1] + " добавлен в белый список модератором " + event.getUser().getName() + " с Discord");
             }
 
-            CompletableFuture.runAsync(() -> {
-                getJda().retrieveUserById(ticket[0]).queue(user -> {
-                    Role grant_role = event.getGuild().getRoleById(getInstance().getConfig().getString("discord" +
-                            ".grant_role", "123456789012345678"));
-                    if (grant_role != null && isAccept) {
-                        event.getGuild().addRoleToMember(user, grant_role).reason("Ticket by FlashWhite").queue(success -> {}, error -> {
-                            sendConsole("(FlashWhite) &6Ошибка при выдаче роли. Проверьте, находится ли бот выше " +
-                                    "указанной роли в конфиге");
-                        });
+            getJda().retrieveUserById(ticket[0]).queue(user -> {
+                Role grant_role = event.getGuild().getRoleById(getInstance().getConfig().getString("discord" +
+                        ".grant_role", "123456789012345678"));
+                if (grant_role != null && isAccept) {
+                    try {
+                        event.getGuild().addRoleToMember(user, grant_role).reason("Ticket by FlashWhite").queue();
+                    } catch (Exception e) {
+                        event.getHook().sendMessage("Ошибка при выдаче роли. Проверьте, находится ли бот выше " +
+                                "указанной роли в конфиге").setEphemeral(true).queue();
                     }
-                    user.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage(verdictMessage.build()).queue());
-                });
+                }
 
-                getDataBase().removeTicket(event.getChannelId());
-                event.getChannel().sendMessage(getEmbed(event.getUser().getAsMention() + " вынес свой вердикт: **" + verdict +
-                        "** данное заявление").build()).queue();
-                event.getChannel().delete().queueAfter(5, TimeUnit.SECONDS);
+                if (logChannel != null) {
+                    EmbedBuilder logMessage = new EmbedBuilder();
+                    logMessage.setTitle("Решение по тикету");
+                    logMessage.addField("Открыл", user.getAsMention(), true);
+                    logMessage.addField("Закрыл", event.getMember().getAsMention(), true);
+                    if (!ticket[1].equals("not_specified")) {
+                        logMessage.addField("Указанный ник", ticket[1], false);
+                    }
+                    logMessage.addField("Вердикт", verdict, false);
+
+                    logChannel.sendMessageEmbeds(logMessage.build()).queue();
+                }
+
+                user.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessageEmbeds(verdictMessage.build()).queue());
             });
+
+            getDataBase().removeTicket(event.getChannelId());
+            event.getHook().sendMessageEmbeds(getEmbed("Вы приняли решение по данному тикету. Канал будет удалён через 5 " +
+                    "секунд.").build()).setEphemeral(true).queue();
+            event.getChannel().delete().queueAfter(5, TimeUnit.SECONDS);
         }
     }
 }

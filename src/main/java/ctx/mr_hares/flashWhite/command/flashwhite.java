@@ -52,9 +52,8 @@ public class flashwhite extends CommandTemplate {
             getInstance().reloadLocale();
 
             if (getInstance().getConfig().getString("discord.bot-token") == null ||
-                    (getInstance().getConfig().getString("discord.bot-token") != null && Objects.equals(getInstance().getConfig().getString("discord.bot-token"), "TOKEN"))) {
-                getInstance().getLogger().warning(ChatColor.RED + "Укажите токен Discord-бота в" +
-                        " файле config.yml");
+                    (getInstance().getConfig().getString("discord.bot-token") != null && Objects.equals(getInstance().getConfig().getString("discord.bot-token"), "YOUR_BOT_TOKEN"))) {
+                getInstance().getLogger().warning(ChatColor.RED + "Specify the Discord bot token in the config.yml file");
             } else {
                 if (getJda() != null) {
                     getJda().shutdown();
@@ -85,7 +84,7 @@ public class flashwhite extends CommandTemplate {
                         }
                     });
                 } catch (Exception e) {
-                    getInstance().getLogger().warning(ChatColor.RED + "Ошибка инициализации Discord-бота");
+                    getInstance().getLogger().warning(ChatColor.RED + "Error initializing the Discord bot");
                 }
             }
 

@@ -4,31 +4,26 @@ import ctx.mr_hares.flashWhite.command.flashwhite;
 import ctx.mr_hares.flashWhite.discord.listener.ButtonInteraction;
 import ctx.mr_hares.flashWhite.discord.listener.ModalInteraction;
 import ctx.mr_hares.flashWhite.discord.listener.SlashCommandInteraction;
+import ctx.mr_hares.flashWhite.minecraft.listener.PlayerJoin;
+import ctx.mr_hares.flashWhite.minecraft.listener.PlayerLogin;
 import ctx.mr_hares.flashWhite.utils.DataBase;
-import ctx.mr_hares.flashWhite.utils.EventRegistrar;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.OnlineStatus;
-import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import net.dv8tion.jda.api.components.container.Container;
-import net.dv8tion.jda.api.components.textdisplay.TextDisplay;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -43,40 +38,54 @@ public final class FlashWhite extends JavaPlugin {
     private static JDA jda = null;
     private static DataBase dataBase;
     private static YamlConfiguration locale;
+    public static TextChannel logChannel = null;
 
     @Override
     public void onEnable() {
-        sendConsole(String.format("&f\n   &#6666ffFlashWhite &7- %s\n   " +
-                        "&7https://modrinth.com/project/flashwhite\n&f",
-                getDescription().getVersion()));
+        sendConsole("&f&r\n  &#6666ffFlashWhite &7by mr_hares&r\n  &fEnable plugin&r\n  &7Version " + getDescription().getVersion() + "&r\n&f&r");
 
         instance = this;
         saveDefaultConfig();
-        getConfig().options().copyDefaults(true);
-        reloadConfig();
+        InputStream defConfig = getResource("config.yml");
+        if (defConfig != null) {
+            getConfig().setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(defConfig,
+                    StandardCharsets.UTF_8)));
+            try {
+                getConfig().options().copyDefaults(true);
+                getConfig().save(new File(getDataFolder(), "config.yml"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         File file = new File(getDataFolder(), "locale.yml");
         if (!file.exists()) {
             saveResource("locale.yml", false);
         }
         locale = YamlConfiguration.loadConfiguration(file);
-        locale.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(getResource("locale.yml"), StandardCharsets.UTF_8)));
-        reloadLocale();
+        InputStream defLocale = getResource("locale.yml");
+        if (defLocale != null) {
+            locale.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(defLocale, StandardCharsets.UTF_8)));
+            try {
+                locale.options().copyDefaults(true);
+                locale.save(new File(getDataFolder(), "locale.yml"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         try {
             dataBase = new DataBase();
             dataBase.initializeDatabase();
         } catch (Exception e) {
-            getServer().getConsoleSender().sendMessage("(FlashWhite) " + ChatColor.RED + "Ошибка создания и " +
-                    "инициализации базы данных");
+            getServer().getConsoleSender().sendMessage("(FlashWhite) " + ChatColor.RED + "Error creating and initializing the database");
         }
 
-        new EventRegistrar(this).registerAllEvents();
+        registerEvents();
 
         if (getConfig().getString("discord.bot-token") == null ||
-                (getConfig().getString("discord.bot-token") != null && Objects.equals(getConfig().getString("discord.bot-token"), "TOKEN"))) {
-            getServer().getConsoleSender().sendMessage("(FlashWhite) " + ChatColor.RED + "Укажите токен Discord-бота " +
-                    "в" +
-                    " файле config.yml");
+                (getConfig().getString("discord.bot-token") != null && Objects.equals(getConfig().getString("discord.bot-token"), "YOUR_BOT_TOKEN"))) {
+            getServer().getConsoleSender().sendMessage("(FlashWhite) " + ChatColor.RED + "Specify the Discord bot token in the config.yml file");
         } else {
             try {
                 JDA jda_tmp =
@@ -101,24 +110,37 @@ public final class FlashWhite extends JavaPlugin {
                                 "Авиасейлс").queue();
                         jda = jda_tmp;
                     } catch (InterruptedException e) {
-                        getServer().getConsoleSender().sendMessage("(FlashWhite) " + ChatColor.RED + "Ошибка " +
-                                "инициализации Discord-бота");
+                        getServer().getConsoleSender().sendMessage("(FlashWhite) " + ChatColor.RED + "Error initializing the Discord bot");
                     }
-                });
+                }).join();
             } catch (Exception e) {
-                getServer().getConsoleSender().sendMessage("(FlashWhite) " + ChatColor.RED + "Ошибка инициализации " +
-                        "Discord-бота");
+                getServer().getConsoleSender().sendMessage("(FlashWhite) " + ChatColor.RED + "Error initializing the Discord bot");
+            }
+        }
+
+        for (Guild guild : jda.getGuilds()) {
+            TextChannel textChannel = guild.getTextChannelById(
+                    getConfig().getLong("discord.log-channel")
+            );
+            if (textChannel != null) {
+                logChannel = textChannel;
+                break;
             }
         }
 
         new flashwhite();
     }
 
+    private void registerEvents() {
+        Bukkit.getPluginManager().registerEvents(new PlayerJoin(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerLogin(), this);
+
+        FlashWhite.sendConsole("(FlashWhite) Have been 2 Minecraft events registered");
+    }
+
     @Override
     public void onDisable() {
-        sendConsole(String.format("&f\n   &#6666ffFlashWhite &7- %s\n   " +
-                        "&7https://modrinth.com/project/flashwhite\n&f",
-                getDescription().getVersion()));
+        sendConsole("&f&r\n  &#6666ffFlashWhite &7by mr_hares&r\n  &fDisable plugin&r\n  &7Version " + getDescription().getVersion() + "&r\n&f&r");
         if (jda != null) {
             jda.shutdown();
         }
@@ -132,6 +154,16 @@ public final class FlashWhite extends JavaPlugin {
     public void reloadLocale() {
         File file = new File(getDataFolder(), "locale.yml");
         locale = YamlConfiguration.loadConfiguration(file);
+
+        for (Guild guild : jda.getGuilds()) {
+            TextChannel textChannel = guild.getTextChannelById(
+                    getConfig().getLong("discord.log-channel")
+            );
+            if (textChannel != null) {
+                logChannel = textChannel;
+                break;
+            }
+        }
     }
 
     public static boolean isInteger(String str) {
@@ -218,7 +250,9 @@ public final class FlashWhite extends JavaPlugin {
             return "";
         }
 
-        message = message.replace("{prefix}", getLocale().getString("prefix", "&#6666ff(FlashWhite) &r"));
+        if (getLocale() != null) {
+            message = message.replace("{prefix}", getLocale().getString("prefix", "&#6666ff(FlashWhite) &r"));
+        }
 
         Matcher matcher = Pattern.compile("&#([A-Fa-f0-9]{6})").matcher(message);
         StringBuffer buffer = new StringBuffer();
@@ -232,12 +266,10 @@ public final class FlashWhite extends JavaPlugin {
         return ChatColor.translateAlternateColorCodes('&', buffer.toString());
     }
 
-    public static MessageCreateBuilder getEmbed(String text) {
-        MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
+    public static EmbedBuilder getEmbed(String text) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setDescription(text);
 
-        messageCreateBuilder.useComponentsV2(true);
-        messageCreateBuilder.addComponents(Container.of(TextDisplay.of(text)));
-
-        return messageCreateBuilder;
+        return embedBuilder;
     }
 }

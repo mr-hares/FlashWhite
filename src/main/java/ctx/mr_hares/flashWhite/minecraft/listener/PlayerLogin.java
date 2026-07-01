@@ -1,7 +1,6 @@
 package ctx.mr_hares.flashWhite.minecraft.listener;
 
 import ctx.mr_hares.flashWhite.FlashWhite;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
@@ -13,7 +12,8 @@ public class PlayerLogin implements Listener {
         if (FlashWhite.getDataBase().isWhite(event.getPlayer().getName())) {
             if (FlashWhite.getDataBase().getUUID(event.getPlayer().getName()) == null) {
                 FlashWhite.getDataBase().SetUUID(event.getPlayer().getName(), event.getPlayer().getUniqueId());
-                FlashWhite.getInstance().getLogger().info(ChatColor.GOLD + "[INFO] Обновление данных для " + event.getPlayer().getName() + " (Добавление UUID игрока)");
+                FlashWhite.getInstance().getLogger().info("(FlashWhite) Updating data for " + event.getPlayer().getName() +
+                        " (Adding player UUID)");
             }
             return;
         }

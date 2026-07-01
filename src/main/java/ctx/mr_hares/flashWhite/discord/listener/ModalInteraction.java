@@ -1,6 +1,7 @@
 package ctx.mr_hares.flashWhite.discord.listener;
 
 import ctx.mr_hares.flashWhite.utils.EmbedBuild;
+import ctx.mr_hares.flashWhite.utils.EmojiParser;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
@@ -70,7 +71,7 @@ public class ModalInteraction extends ListenerAdapter {
                 if (value != null && !value.getAsString().trim().isEmpty()) {
                     answers.put(key, value.getAsString().trim());
                 } else if (questions.getBoolean(key + ".required", true)) {
-                    event.getHook().sendMessage(getEmbed("❌ Пожалуйста, ответьте на все обязательные вопросы").build())
+                    event.getHook().sendMessageEmbeds(getEmbed("❌ Пожалуйста, ответьте на все обязательные вопросы").build())
                             .setEphemeral(true)
                             .queue();
                     return;
@@ -85,7 +86,7 @@ public class ModalInteraction extends ListenerAdapter {
         EmbedBuilder embed = new EmbedBuild(CONFIG_TICKET_MESSAGE, event, event.getUser(), answers).getEmbedBuilder();
 
         if ((content == null || content.isEmpty()) && embed.isEmpty()) {
-            event.getHook().sendMessage(getEmbed("❌ Ошибка. В сообщение отсутствует содержание\nЗагляните в config" +
+            event.getHook().sendMessageEmbeds(getEmbed("❌ Ошибка. В сообщение отсутствует содержание\nЗагляните в config" +
                             ".yml и добавьте содержание ticket-message для embed или content").build())
                     .setEphemeral(true)
                     .queue();
@@ -98,12 +99,33 @@ public class ModalInteraction extends ListenerAdapter {
         if (!embed.isEmpty()) messageCreateBuilder.addEmbeds(embed.build());
 
         String acceptText = getInstance().getConfig().getString(CONFIG_TICKET_MESSAGE + ".button.accept.text", "Принять");
+        String acceptType = getInstance().getConfig().getString(CONFIG_TICKET_MESSAGE + ".button.accept.type",
+                "SUCCESS");
+        String acceptSymbol = getInstance().getConfig().getString(CONFIG_TICKET_MESSAGE + ".button.accept.symbol",
+                null);
+
         String declineText = getInstance().getConfig().getString(CONFIG_TICKET_MESSAGE + ".button.decline.text", "Отклонить");
+        String declineType = getInstance().getConfig().getString(CONFIG_TICKET_MESSAGE + ".button.decline.type",
+                "SUCCESS");
+        String declineSymbol = getInstance().getConfig().getString(CONFIG_TICKET_MESSAGE + ".button.decline.symbol",
+                null);
+
+        Button success = switch (acceptType) {
+            case "SECONDARY" -> Button.secondary("accept_ticket", acceptText).withEmoji(EmojiParser.parseEmoji(acceptSymbol));
+            case "PRIMARY" -> Button.primary("accept_ticket", acceptText).withEmoji(EmojiParser.parseEmoji(acceptSymbol));
+            default -> Button.success("accept_ticket", acceptText).withEmoji(EmojiParser.parseEmoji(acceptSymbol));
+        };
+
+        Button danger = switch (declineType) {
+            case "SECONDARY" -> Button.secondary("decline_ticket", declineText).withEmoji(EmojiParser.parseEmoji(declineSymbol));
+            case "PRIMARY" -> Button.primary("decline_ticket", declineText).withEmoji(EmojiParser.parseEmoji(declineSymbol));
+            default -> Button.danger("decline_ticket", declineText).withEmoji(EmojiParser.parseEmoji(declineSymbol));
+        };
 
         messageCreateBuilder.addComponents(
                 ActionRow.of(
-                        Button.success("accept_ticket", acceptText),
-                        Button.danger("decline_ticket", declineText)
+                        success,
+                        danger
                 )
         );
 
@@ -111,7 +133,7 @@ public class ModalInteraction extends ListenerAdapter {
         Category category = event.getGuild().getCategoryById(categoryId);
 
         if (category == null) {
-            event.getHook().sendMessage(getEmbed("❌ Категория для тикетов не найдена. Обратитесь к администратору.").build())
+            event.getHook().sendMessageEmbeds(getEmbed("❌ Категория для тикетов не найдена. Обратитесь к администратору.").build())
                     .setEphemeral(true)
                     .queue();
             return;
@@ -130,14 +152,14 @@ public class ModalInteraction extends ListenerAdapter {
                 getDataBase().createTicket(textChannel.getId(), event.getUser().getId(), nick);
 
                 textChannel.sendMessage(messageCreateBuilder.build()).queue();
-                event.getHook().sendMessage(getEmbed("✅ Ваше заявление на внесение в белый список отправлено!\nКанал: " + textChannel.getAsMention()).build())
+                event.getHook().sendMessageEmbeds(getEmbed("✅ Ваше заявление на внесение в белый список " +
+                                "отправлено!\nКанал: " + textChannel.getAsMention()).build())
                         .setEphemeral(true)
                         .queue();
             }, error -> {
-                event.getHook().sendMessage(getEmbed("❌ При создании канала произошла ошибка: " + error.getMessage()).build())
+                event.getHook().sendMessageEmbeds(getEmbed("❌ При создании канала произошла ошибка: " + error.getMessage()).build())
                         .setEphemeral(true)
                         .queue();
-                getInstance().getLogger().severe("Failed to create ticket channel: " + error.getMessage());
             });
         });
     }

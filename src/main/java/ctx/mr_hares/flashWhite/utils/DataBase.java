@@ -36,7 +36,7 @@ public class DataBase {
                         "user_id TEXT NOT NULL," +
                         "nick TEXT NOT NULL)", "ticket_list"));
             }
-            FlashWhite.sendConsole("(FlashWhite) Выполнено подключение к базе данных");
+            FlashWhite.sendConsole("(FlashWhite) Connection to the database has been completed");
         } catch (SQLException e) {
             FlashWhite.getInstance().getLogger().warning(ChatColor.RED + "Ошибка подключения к базе данных");
         }
