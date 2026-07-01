@@ -6,7 +6,7 @@
 
     <groupId>ctx.mr_hares</groupId>
     <artifactId>FlashWhite</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <packaging>jar</packaging>
 
     <name>FlashWhite</name>
