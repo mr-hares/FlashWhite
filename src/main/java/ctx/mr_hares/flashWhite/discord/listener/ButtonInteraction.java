@@ -155,7 +155,8 @@ public class ButtonInteraction extends ListenerAdapter {
 
             if (isAccept && ticket.length > 1 && ticket[1] != null && !ticket[1].equals("not_specified")) {
                 getDataBase().addPlayer("not", ticket[1], "[DS] " + event.getUser().getName());
-                sendConsole("(FlashWhite) Игрок " + ticket[1] + " добавлен в белый список модератором " + event.getUser().getName() + " с Discord");
+                sendConsole("(FlashWhite) Player " + ticket[1] + " has been added to the white list by moderator " +
+                        event.getUser().getName() + " from Discord");
             }
 
             getJda().retrieveUserById(ticket[0]).queue(user -> {
