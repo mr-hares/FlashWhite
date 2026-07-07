@@ -1,4 +1,4 @@
-![flash white](https://cdn.modrinth.com/data/cached_images/75d43f8a032e69e9d2bcc5b6cdb0c327fef48c3d.png)
+![flash white](https://cdn.modrinth.com/data/cached_images/3cef200f0aea8bf66d86b2c16b3e37f5c7dc8e7a.png)
 
 **FlashWhite** - plugin that automates server management, allowing players to submit requests through Discord modals and administrators to approve them with one-click buttons **approve/reject**.
 
