@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -118,13 +117,15 @@ public final class FlashWhite extends JavaPlugin {
             }
         }
 
-        for (Guild guild : jda.getGuilds()) {
-            TextChannel textChannel = guild.getTextChannelById(
-                    getConfig().getLong("discord.log-channel")
-            );
-            if (textChannel != null) {
-                logChannel = textChannel;
-                break;
+        if (jda != null) {
+            for (Guild guild : jda.getGuilds()) {
+                TextChannel textChannel = guild.getTextChannelById(
+                        getConfig().getLong("discord.log-channel")
+                );
+                if (textChannel != null) {
+                    logChannel = textChannel;
+                    break;
+                }
             }
         }
 
@@ -155,13 +156,15 @@ public final class FlashWhite extends JavaPlugin {
         File file = new File(getDataFolder(), "locale.yml");
         locale = YamlConfiguration.loadConfiguration(file);
 
-        for (Guild guild : jda.getGuilds()) {
-            TextChannel textChannel = guild.getTextChannelById(
-                    getConfig().getLong("discord.log-channel")
-            );
-            if (textChannel != null) {
-                logChannel = textChannel;
-                break;
+        if (jda != null) {
+            for (Guild guild : jda.getGuilds()) {
+                TextChannel textChannel = guild.getTextChannelById(
+                        getConfig().getLong("discord.log-channel")
+                );
+                if (textChannel != null) {
+                    logChannel = textChannel;
+                    break;
+                }
             }
         }
     }
@@ -211,7 +214,7 @@ public final class FlashWhite extends JavaPlugin {
         Bukkit.getServer().getConsoleSender().sendMessage(color(text));
     }
 
-    public static String replacePlaceholder(String text, ModalInteractionEvent event, User user,
+    public static String replacePlaceholder(String text, ModalInteractionEvent event, Map<String, String> placeholders,
                                             Map<String, String> answers) {
         if (text == null) return null;
 
@@ -234,12 +237,10 @@ public final class FlashWhite extends JavaPlugin {
             text = result.toString();
         }
 
-        if (user != null) {
-            text = text.replace("{mention}", user.getAsMention())
-                    .replace("{user_id}", user.getId())
-                    .replace("{user_name}", user.getName())
-                    .replace("{user_tag}", user.getAsTag())
-                    .replace("{user_avatar}", user.getAvatarUrl() != null ? user.getAvatarUrl() : user.getDefaultAvatarUrl());
+        if (placeholders != null) {
+            for (String placeholder: placeholders.keySet()) {
+                text = text.replace(placeholder, placeholders.get(placeholder));
+            }
         }
 
         return text;

@@ -26,14 +26,14 @@ discord:
 
   # -------- СООБЩЕНИЕ ДЛЯ СОЗДАНИЯ ТИКЕТА --------
   info-message:
-    content: "# Подача заявки на Whitelist"
+    content: ""
     embed:
-      title: ""
+      title: "Подача заявки на Whitelist"
       author:
         name: ""
         url: ""
         icon_url: ""
-      description: ""
+      description: "Используйте кнопку под сообщением для начала процесса создания заявки."
       fields:
         1:
           name: ""
@@ -67,9 +67,9 @@ discord:
 
   # -------- СООБЩЕНИЕ ВНУТРИ ТИКЕТА --------
   ticket-message:
-    content: "**Новая заявка от {mention}**"
+    content: "Новая заявка от {user_mention}"
     embed:
-      title: ""
+      title: "Содержание заявки"
       author:
         name: ""
         url: ""
@@ -107,3 +107,67 @@ discord:
 
         # Эмодзи возле текста кнопки (Обычные/Кастомные сервера)
         symbol: ""
+
+  # -------- СООБЩЕНИЕ ВЕРДИКТА --------
+  verdict-message:
+    content: ""
+    embed:
+      title: "Вердикт по тикету"
+      author:
+        name: ""
+        url: ""
+        icon_url: ""
+      description: ""
+      fields:
+        1:
+          name: "Модератор"
+          value: "{moder_mention}"
+          inline: true
+        2:
+          name: "Вердикт"
+          value: "{verdict}"
+          inline: true
+        3:
+          name: "Дата закрытия"
+          value: "{date}"
+          inline: false
+      image_url: ""
+      thumbnail_url: ""
+      timestamp: true
+      color: ""
+
+  # -------- СООБЩЕНИЕ ЛОГОВ --------
+  log-message:
+    content: ""
+    embed:
+      title: "Решение по тикету"
+      author:
+        name: ""
+        url: ""
+        icon_url: ""
+      description: ""
+      fields:
+        1:
+          name: "Открыл"
+          value: "{user_mention}"
+          inline: true
+        2:
+          name: "Модератор"
+          value: "{moder_mention}"
+          inline: true
+        3:
+          name: "Указанный ник"
+          value: "{nick}"
+          inline: true
+        4:
+          name: "Вердикт"
+          value: "{verdict}"
+          inline: false
+        5:
+          name: "Дата закрытия"
+          value: "{date}"
+          inline: false
+      image_url: ""
+      thumbnail_url: ""
+      timestamp: true
+      color: ""

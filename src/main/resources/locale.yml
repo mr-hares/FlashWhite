@@ -42,3 +42,7 @@ list:
     - "    &8UUID: {uuid}"
 
 not-found-page: "{prefix}&fУказанная страница &#6666ffне найдена."
+
+discord:
+  already-create-ticket: "❌ У вас уже имеется активный тикет"
+  create-ticket: "✅ Ваше заявление на внесение в белый список отправлено!\nКанал: {channel}"

@@ -21,13 +21,13 @@ public class EmbedBuild implements Listener {
         return text.startsWith("http://") || text.startsWith("https://") ? text : null;
     }
 
-    public EmbedBuild(String configPath, ModalInteractionEvent event, User user,
+    public EmbedBuild(String configPath, ModalInteractionEvent event, Map<String, String> placeholders,
                                 Map<String, String> answers) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
 
         String title = getInstance().getConfig().getString(configPath + ".embed.title");
         if (title != null && !title.isEmpty()) {
-            embedBuilder.setTitle(replacePlaceholder(title, event, user, answers));
+            embedBuilder.setTitle(replacePlaceholder(title, event, placeholders, answers));
         }
 
         String authorName = getInstance().getConfig().getString(configPath + ".embed.author.name", null);
@@ -35,13 +35,13 @@ public class EmbedBuild implements Listener {
         String authorIcon = getInstance().getConfig().getString(configPath + ".embed.author.icon_url", null);
 
         if (authorName != null && !authorName.isEmpty()) {
-            String processedAuthorName = replacePlaceholder(authorName, event, user, answers);
-            embedBuilder.setAuthor(processedAuthorName, validURL(authorUrl), validURL(replacePlaceholder(authorIcon, event, user, answers)));
+            String processedAuthorName = replacePlaceholder(authorName, event, placeholders, answers);
+            embedBuilder.setAuthor(processedAuthorName, validURL(authorUrl), validURL(replacePlaceholder(authorIcon, event, placeholders, answers)));
         }
 
         String description = getInstance().getConfig().getString(configPath + ".embed.description");
         if (description != null && !description.isEmpty()) {
-            embedBuilder.setDescription(replacePlaceholder(description, event, user, answers));
+            embedBuilder.setDescription(replacePlaceholder(description, event, placeholders, answers));
         }
 
         ConfigurationSection fields = getInstance().getConfig().getConfigurationSection(configPath + ".embed.fields");
@@ -53,8 +53,8 @@ public class EmbedBuild implements Listener {
 
                 if (name != null && !name.isEmpty() && value != null && !value.isEmpty()) {
                     embedBuilder.addField(
-                            replacePlaceholder(name, event, user, answers),
-                            replacePlaceholder(value, event, user, answers),
+                            replacePlaceholder(name, event, placeholders, answers),
+                            replacePlaceholder(value, event, placeholders, answers),
                             inline
                     );
                 }

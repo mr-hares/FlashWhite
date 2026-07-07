@@ -49,7 +49,6 @@ public class flashwhite extends CommandTemplate {
             long start = System.currentTimeMillis();
             sender.sendMessage(color(getLocale().getString("reload-start")));
             getInstance().reloadConfig();
-            getInstance().reloadLocale();
 
             if (getInstance().getConfig().getString("discord.bot-token") == null ||
                     (getInstance().getConfig().getString("discord.bot-token") != null && Objects.equals(getInstance().getConfig().getString("discord.bot-token"), "YOUR_BOT_TOKEN"))) {
@@ -71,22 +70,22 @@ public class flashwhite extends CommandTemplate {
                             GatewayIntent.GUILD_MEMBERS
                     ).setStatus(OnlineStatus.DO_NOT_DISTURB).build();
 
-                    CompletableFuture.runAsync(() -> {
-                        try {
-                            jda.awaitReady();
-                            jda.updateCommands().addCommands(
-                                    Commands.slash("setup", "Инициализация системы").setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))).queue();
-                            jda.getApplicationManager().setDescription("**Бот-заявочник** при поддержке плагина " +
-                                    "flashWhite и Авиасейлс").queue();
-                            setJDA(jda);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                    try {
+                        jda.awaitReady();
+                        jda.updateCommands().addCommands(
+                                Commands.slash("setup", "Инициализация системы").setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))).queue();
+                        jda.getApplicationManager().setDescription("**Бот-заявочник** при поддержке плагина " +
+                                "flashWhite и Авиасейлс").queue();
+                        setJDA(jda);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 } catch (Exception e) {
                     getInstance().getLogger().warning(ChatColor.RED + "Error initializing the Discord bot");
                 }
             }
+
+            getInstance().reloadLocale();
 
             sender.sendMessage(color(getLocale().getString("reload-end").replace("{time}", String.valueOf((System.currentTimeMillis() - start) / 1000))));
             return;
@@ -149,7 +148,8 @@ public class flashwhite extends CommandTemplate {
                 return;
             }
             if (!getDataBase().isWhite(args[1])) {
-                sender.sendMessage(color(getLocale().getString("player-not-in-whitelist")));
+                sender.sendMessage(color(getLocale().getString("player-not-in-whitelist").replace("{player}",
+                        args[1])));
                 return;
             }
             getDataBase().removePlayer(args[1]);

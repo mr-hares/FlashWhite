@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -28,6 +29,18 @@ public class ModalInteraction extends ListenerAdapter {
     private static final String CONFIG_TICKET_MESSAGE = "discord.ticket-message";
     private static final String CONFIG_QUESTIONS = "discord.questions";
     private static final String CONFIG_ROLE_STAFF = "discord.role_staff";
+
+    private Map<String, String> getUserPlaceholders(String prefix, User user) {
+        Map<String, String> placeholders = new HashMap<>();
+
+        placeholders.put("{" + prefix + "_mention}", user.getAsMention());
+        placeholders.put("{" + prefix + "_id}", user.getId());
+        placeholders.put("{" + prefix + "_name}", user.getName());
+        placeholders.put("{" + prefix + "_tag}", user.getAsTag());
+        placeholders.put("{" + prefix + "_avatar}", user.getAvatarUrl() != null ? user.getAvatarUrl() : user.getDefaultAvatarUrl());
+
+        return placeholders;
+    }
 
     private void addStaffPermissions(ChannelAction<TextChannel> channelAction, net.dv8tion.jda.api.entities.Guild guild) {
         List<?> roleStaff = getInstance().getConfig().getList(CONFIG_ROLE_STAFF);
@@ -83,7 +96,8 @@ public class ModalInteraction extends ListenerAdapter {
 
         MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
         String content = getInstance().getConfig().getString(CONFIG_TICKET_MESSAGE + ".content");
-        EmbedBuilder embed = new EmbedBuild(CONFIG_TICKET_MESSAGE, event, event.getUser(), answers).getEmbedBuilder();
+        EmbedBuilder embed =
+                new EmbedBuild(CONFIG_TICKET_MESSAGE, event, getUserPlaceholders("user", event.getUser()), answers).getEmbedBuilder();
 
         if ((content == null || content.isEmpty()) && embed.isEmpty()) {
             event.getHook().sendMessageEmbeds(getEmbed("❌ Ошибка. В сообщение отсутствует содержание\nЗагляните в config" +
@@ -94,7 +108,7 @@ public class ModalInteraction extends ListenerAdapter {
         }
 
         if (content != null && !content.isEmpty()) {
-            messageCreateBuilder.addContent(replacePlaceholder(content, event, event.getUser(), answers));
+            messageCreateBuilder.addContent(replacePlaceholder(content, event, getUserPlaceholders("user", event.getUser()), answers));
         }
         if (!embed.isEmpty()) messageCreateBuilder.addEmbeds(embed.build());
 
@@ -142,7 +156,8 @@ public class ModalInteraction extends ListenerAdapter {
         CompletableFuture.runAsync(() -> {
             ChannelAction<TextChannel> channelAction =
                     category.createTextChannel(replacePlaceholder(getInstance().getConfig().getString("discord" +
-                                    ".ticket.name_format", "ticket-{user_name}"), null, event.getUser(), null))
+                                    ".ticket.name_format", "ticket-{user_name}"), null, getUserPlaceholders("user",
+                                    event.getUser()), null))
                             .addPermissionOverride(event.getGuild().getPublicRole(), null, List.of(Permission.VIEW_CHANNEL))
                             .addPermissionOverride(event.getMember(), List.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_HISTORY), null);
 
@@ -152,8 +167,8 @@ public class ModalInteraction extends ListenerAdapter {
                 getDataBase().createTicket(textChannel.getId(), event.getUser().getId(), nick);
 
                 textChannel.sendMessage(messageCreateBuilder.build()).queue();
-                event.getHook().sendMessageEmbeds(getEmbed("✅ Ваше заявление на внесение в белый список " +
-                                "отправлено!\nКанал: " + textChannel.getAsMention()).build())
+                event.getHook().sendMessageEmbeds(getEmbed(getLocale().getString("discord.create-ticket")
+                                .replace("{channel}", textChannel.getAsMention())).build())
                         .setEphemeral(true)
                         .queue();
             }, error -> {

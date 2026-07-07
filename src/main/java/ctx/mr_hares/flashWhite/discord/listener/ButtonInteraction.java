@@ -1,5 +1,6 @@
 package ctx.mr_hares.flashWhite.discord.listener;
 
+import ctx.mr_hares.flashWhite.utils.EmbedBuild;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.components.label.Label;
@@ -7,16 +8,14 @@ import net.dv8tion.jda.api.components.textinput.TextInput;
 import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.modals.Modal;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -26,6 +25,20 @@ import static ctx.mr_hares.flashWhite.FlashWhite.*;
 public class ButtonInteraction extends ListenerAdapter {
     private static final String CONFIG_QUESTIONS = "discord.questions";
     private static final String CONFIG_ROLE_STAFF = "discord.role_staff";
+    private static final String CONFIG_VERDICT_MESSAGE = "discord.verdict-message";
+    private static final String CONFIG_LOG_MESSAGE = "discord.log-message";
+
+    private Map<String, String> getUserPlaceholders(String prefix, User user) {
+        Map<String, String> placeholders = new HashMap<>();
+
+        placeholders.put("{" + prefix + "_mention}", user.getAsMention());
+        placeholders.put("{" + prefix + "_id}", user.getId());
+        placeholders.put("{" + prefix + "_name}", user.getName());
+        placeholders.put("{" + prefix + "_tag}", user.getAsTag());
+        placeholders.put("{" + prefix + "_avatar}", user.getAvatarUrl() != null ? user.getAvatarUrl() : user.getDefaultAvatarUrl());
+
+        return placeholders;
+    }
 
     private boolean hasPermission(Member member) {
         if (member == null) return false;
@@ -98,7 +111,7 @@ public class ButtonInteraction extends ListenerAdapter {
             try {
                 String[] existingTicket = getDataBase().getTicket(event.getUser().getIdLong());
                 if (existingTicket != null) {
-                    event.replyEmbeds(getEmbed("❌ У вас уже имеется активный тикет").build())
+                    event.replyEmbeds(getEmbed(getLocale().getString("discord.already-create-ticket")).build())
                             .setEphemeral(true)
                             .queue();
                     return;
@@ -143,20 +156,21 @@ public class ButtonInteraction extends ListenerAdapter {
                 return;
             }
 
-            boolean isAccept = buttonId.equals("accept_ticket");
-            String verdict = isAccept ? "Принять" : "Отклонить";
+            String acceptText = getInstance().getConfig().getString("discord.ticket-message.button.accept.text", "Принять");
+            String declineText = getInstance().getConfig().getString("discord.ticket-message.button.decline.text", "Отклонить");
 
-            EmbedBuilder verdictMessage = new EmbedBuilder();
-            verdictMessage.setTitle("Решение по тикету");
-            verdictMessage.addField("Модератор", event.getUser().getAsMention(), true);
-            verdictMessage.addField("Вердикт", verdict, true);
-            verdictMessage.addField("Дата закрытия", String.format("<t:%d:F>", Instant.now().getEpochSecond()), false);
-            verdictMessage.setFooter("Спасибо за обращение");
+            boolean isAccept = buttonId.equals("accept_ticket");
+            String verdict = isAccept ? acceptText : declineText;
+
+            Map<String, String> plList = getUserPlaceholders("moder", event.getUser());
+            plList.put("{date}", String.format("<t:%d:F>", Instant.now().getEpochSecond()));
+            plList.put("{verdict}", verdict);
+
+            EmbedBuilder verdictMessage = new EmbedBuild(CONFIG_VERDICT_MESSAGE, null, plList, null).getEmbedBuilder();
 
             if (isAccept && ticket.length > 1 && ticket[1] != null && !ticket[1].equals("not_specified")) {
                 getDataBase().addPlayer("not", ticket[1], "[DS] " + event.getUser().getName());
-                sendConsole("(FlashWhite) Player " + ticket[1] + " has been added to the white list by moderator " +
-                        event.getUser().getName() + " from Discord");
+                sendConsole("(FlashWhite) Player" + ticket[1] + " whitelisted by " + event.getUser().getName() + " (Discord)");
             }
 
             getJda().retrieveUserById(ticket[0]).queue(user -> {
@@ -172,15 +186,11 @@ public class ButtonInteraction extends ListenerAdapter {
                 }
 
                 if (logChannel != null) {
-                    EmbedBuilder logMessage = new EmbedBuilder();
-                    logMessage.setTitle("Решение по тикету");
-                    logMessage.addField("Открыл", user.getAsMention(), true);
-                    logMessage.addField("Закрыл", event.getMember().getAsMention(), true);
-                    if (!ticket[1].equals("not_specified")) {
-                        logMessage.addField("Указанный ник", ticket[1], false);
-                    }
-                    logMessage.addField("Вердикт", verdict, false);
+                    Map<String, String> placeholders = getUserPlaceholders("user", user);
+                    placeholders.putAll(plList);
+                    placeholders.put("{nick}", ticket[1]);
 
+                    EmbedBuilder logMessage = new EmbedBuild(CONFIG_LOG_MESSAGE, null, placeholders, null).getEmbedBuilder();
                     logChannel.sendMessageEmbeds(logMessage.build()).queue();
                 }
 
