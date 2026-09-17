@@ -1,0 +1,57 @@
+name: FlashWhite
+version: '1.1.3'
+main: ru.mr_hares.flashWhite.FlashWhite
+api-version: '1.21'
+authors: [ mr_hares ]
+folia-supported: true
+
+commands:
+  flashwhite:
+    description: Главная команда управления плагином FlashWhite.
+    aliases: [fw, fwhite]
+    permission: flashwhite.add
+    usage: /<command> [add/remove/list/check/reload/on/off]
+
+permissions:
+  flashwhite.admin:
+    description: Полный доступ ко всем функциям плагина.
+    default: op
+    children:
+      flashwhite.add: true
+      flashwhite.remove: true
+      flashwhite.list: true
+      flashwhite.check: true
+      flashwhite.reload: true
+      flashwhite.toggle: true
+
+  flashwhite.status:
+    description: Позволяет проверить свой статус в вайтлисте.
+    default: true # Доступно всем игрокам по умолчанию
+
+  flashwhite.bypass:
+    description: Позволяет заходить на сервер в обход вайтлиста.
+    default: op
+
+  flashwhite.add:
+    description: Позволяет добавлять игроков в вайтлист.
+    default: op
+
+  flashwhite.remove:
+    description: Позволяет удалять игроков из вайтлиста.
+    default: op
+
+  flashwhite.list:
+    description: Позволяет просматривать список игроков в вайтлисте.
+    default: op
+
+  flashwhite.check:
+    description: Позволяет проверять статус конкретного игрока и его Discord ID.
+    default: op
+
+  flashwhite.reload:
+    description: Позволяет перезагружать конфигурацию плагина.
+    default: op
+
+  flashwhite.toggle:
+    description: Позволяет включать и выключать режим вайтлиста.
+    default: op

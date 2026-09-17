@@ -1,0 +1,73 @@
+prefix: "#6666ffFlashWhite | &f"
+
+time:
+  d: "#ff9100{time} #9e9e9eдн."
+  h: "#ff9100{time} #9e9e9eч."
+  m: "#ff9100{time} #9e9e9eмин."
+  s: "#ff9100{time} #9e9e9eсек."
+  forever: "&#d500f9навсегда"
+
+kick:
+  message:
+    - ""
+    - "#ffffffДоступ ограничен"
+    - "&fВы не числитесь в белом списке нашего сервера."
+    - "#a5d6a7Подать заявку на вход: #6666ffdiscord.gg/server"
+    - ""
+
+system:
+  no_permission: "{prefix}У вас недостаточно прав для выполнения этой команды."
+  reload: "{prefix}&aКонфигурация успешно обновлена"
+  invalid_page: "{prefix}Указанная страница списка не найдена."
+  toggle_on: "{prefix}&aБелый список успешно включен. &fТеперь вход доступен только проверенным игрокам."
+  toggle_off: "{prefix}&cБелый список отключен. &fВход на сервер открыт для всех желающих."
+
+help:
+  syntax:
+    add: "{prefix}Неверный формат. Используйте: #a5d6a7/fw add #ffe082[ник]"
+    addtemp: "{prefix}Неверный формат. Используйте: #a5d6a7/fw addtemp #ffe082[ник] [время]"
+    remove: "{prefix}Неверный формат. Используйте: #a5d6a7/fw remove #ffe082[ник]"
+    list: "{prefix}Неверный формат. Используйте: #a5d6a7/fw list #ffe082[страница]"
+    check: "{prefix}Неверный формат. Используйте: #a5d6a7/fw check #ffe082[ник]"
+    toggle: "{prefix}Неверный формат. Используйте: #a5d6a7/fw [on/off]"
+  commands:
+    - ""
+    - "  #6666ffFlashWhite &8| &#ffffffУправление доступом:"
+    - "  #6666ff• #a5d6a7/fw reload &8— &fПерезагрузить конфигурацию плагина"
+    - "  #6666ff• #a5d6a7/fw add &e[ник] &8— &fДобавить игрока в белый список"
+    - "  #6666ff• #a5d6a7/fw addtemp &e[ник] [время] &8— &fДобавить игрока на время"
+    - "  #6666ff• #a5d6a7/fw remove &e[ник] &8— &fУдалить игрока из белого списка"
+    - "  #6666ff• #a5d6a7/fw list &e[страница] &8— &fПосмотреть список участников"
+    - "  #6666ff• #a5d6a7/fw check &e[ник] &8— &fПосмотреть информацию об игроке"
+    - "  #6666ff• #a5d6a7/fw on/off &8— &fВключить/Выключить белый список"
+    - ""
+
+players:
+  not_found: "{prefix}Игрок #ffe082{player} &cне найден в белом списке сервера."
+  already_in: "{prefix}Игрок #ffe082{player} &cуже внесен в белый список."
+  added: "{prefix}Игрок #ffe082{player} &fуспешно добавлен. #808080(Срок: {time}&8)"
+  removed: "{prefix}Игрок #ffe082{player} &fуспешно удален из белого списка."
+
+list:
+  header: "#6666ff&lFlashWhite &8| #ffffffБелый список &8(Страница {page}&8)"
+  item:
+    - "  &7• &f{player} &8[Внес: &a{moder}&8]"
+    - "    &8UUID: {uuid}"
+
+check:
+  header: "#6666ff&lFlashWhite &8| #ffffffИнформация об игроке #a5d6a7{player}:"
+  info:
+    - "  #6666ff• &fСтатус: {status}"
+    - "  #6666ff• &fUUID: &7{uuid}"
+    - "  #6666ff• &fДобавлен модератором: &e{moder}"
+    - "  #6666ff• &fDiscord ID: &9{discord_id}"
+
+  status:
+    in-whitelist: "&aВ вайтлисте"
+    not-in-whitelist: "&cНе в вайтлисте"
+
+discord:
+  ticket_exists: "❌ **Ошибка:** У вас уже создано активное обращение. Пожалуйста, ожидайте ответа."
+  ticket_created: "✅ **Успешно:** Ваша заявка отправлена. Следите за статусом в канале: {channel}"
+  ticket_close: "✅ **Успешно:** Вы приняли решение по поводу тикета. Он удалится через 5 секунд"
+  not_permission: "❌ **Ошибка:** Вам недоступно данное действие"
