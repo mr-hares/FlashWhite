@@ -1,33 +1,46 @@
-![flash white](https://cdn.modrinth.com/data/cached_images/3cef200f0aea8bf66d86b2c16b3e37f5c7dc8e7a.png)
+## FlashWhite — Automated Whitelist Management via Discord
 
-**FlashWhite** - plugin that automates server management, allowing players to submit requests through Discord modals and administrators to approve them with one-click buttons **approve/reject**.
-
----
-
-**Features**
-- Ability to create Discord statements.
-- Saving a player by UUID. Licensed accounts can change their in-game nickname without worrying about losing access to the server.
-- Support for hexadecimal color in messages
-- Lightweight and high performance
+**FlashWhite** is a lightweight, high-performance Minecraft plugin that completely automates your server's whitelist management. Players can submit access requests using intuitive **Discord Modals**, while administrators can instantly review, accept, or deny applications with **one-click buttons** right from their Discord server.
 
 ---
 
-**Installation**
--  `1.` Disable the default Minecraft white list in `server.properties` by setting the value to `white-list=false`
-- `2.` Install the `.jar` file plugin in the plugins folder
-- `3.` Start or restart your server
+## Key Features
+
+* **Seamless Discord Integration:** Painless application process via Discord Modals and easy management using interactive **Approve / Reject** buttons.
+* **UUID-Based Storage:** Players are saved by their unique UUID. Licensed account holders can change their in-game nicknames without losing access or data.
+* **HEX Color Support:** Full support for hexadecimal color codes to create beautiful, branded, and vibrant chat messages.
+* **Ultra-Lightweight & Performant:** Highly optimized codebase that runs instantly without impacting your server's TPS or performance.
 
 ---
 
-**Minecraft command list**
-- /flashwhite reload - reload the plugin.
-- /flashwhite add [nickname] [time] - add a player to the list.
-- /flashwhite remove [nickname] - remove a player from the list.
-- /flashwhite list [page] - show the white list.
+## Installation
 
-**Discord command list**
-- /setup - sending an information message.
+1. Open your `server.properties` file and disable the default Minecraft whitelist by changing the value to:
+   ```properties
+   white-list=false
+   ```
+2. Drop the downloaded `.jar` file into your server's `/plugins/` folder.
+3. Start or restart your server to generate the configuration files.
+4. Set up your Discord Bot token and channel IDs in the generated `config.yml`.
 
-**List of permissions**
-- flashwhite.use - the ability to use the plugin's basic commands.
-- flashwhite.reload - the ability to reload the configuration.
+---
+
+## Commands & Permissions
+
+### Minecraft In-Game Commands
+
+| Command | Description | Permission Node |
+| :--- | :--- | :--- |
+| `/fw reload` | Reloads the plugin configuration files | `flashwhite.reload` |
+| `/fw add [nickname]` | Manually adds a player to the whitelist | `flashwhite.add` |
+| `/fw addtemp [nickname] [time]` | Temporarily adds a player for a specific duration | `flashwhite.add` |
+| `/fw remove [nickname]` | Removes a player from the whitelist | `flashwhite.remove` |
+| `/fw check [nickname]` | Displays player info and their linked Discord ID | `flashwhite.check` |
+| `/fw list [page]` | Views the structured list of whitelisted participants | `flashwhite.list` |
+| `/fw on` / `/fw off` | Enables or disables the whitelist mode | `flashwhite.toggle` |
+
+> 💡 **Bypass Permission:** Grant `flashwhite.bypass` to allow specific users or staff groups to connect to the server regardless of the whitelist status.
+
+### Discord Slash Commands
+
+* `/setup_plugin` — Sends the initial information embed with the application button to the designated text channel.
